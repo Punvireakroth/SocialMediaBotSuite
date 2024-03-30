@@ -1,0 +1,11 @@
+{
+  "name": "autoreplybot",
+  "version": "1.0.0",
+  "description": "This bot automatically replies to comments on your Facebook posts. It's built with Node.js and uses the Facebook Graph API to fetch comments and generate replies.",
+  "main": "app.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Pun VireakRoth",
+  "license": "MIT"
+}

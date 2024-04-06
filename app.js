@@ -1,6 +1,6 @@
 import express from 'express';
 import configEngine from './config/viewEngine';
-import initWebRoutes from './routes/comments';
+import initWebRoutes from './routes/webhookRoutes';
 import bodyParser from 'body-parser'; 
 require('dotenv').config;
 

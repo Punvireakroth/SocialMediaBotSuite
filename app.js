@@ -1,6 +1,6 @@
 import express from 'express';
 import configEngine from './config/viewEngine';
-import initWebRoutes from './routes/web';
+import initWebRoutes from './routes/comments';
 import bodyParser from 'body-parser'; 
 require('dotenv').config;
 
@@ -10,6 +10,7 @@ let app = express();
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 
+// View engine configuration
 configEngine(app);
 
 

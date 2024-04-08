@@ -10,9 +10,8 @@ let app = express();
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 
-// View engine configuration
+// View ngine configuration
 configEngine(app);
-
 
 initWebRoutes(app);
 

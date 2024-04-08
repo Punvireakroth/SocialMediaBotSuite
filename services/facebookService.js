@@ -37,7 +37,7 @@ async function getDetails(accessToken, url, parameter, valid, ID) {
 
 async function readComments(postID, pageAccessToken, commentMsg) {
     const comments = [];
-    const readCommentsUrl = `https://graph.facebook.com/v2.1/${postID}/comments`;
+    const readCommentsUrl = `https://graph.facebook.com/v6.0/${postID}/comments`;
     const params = { access_token: pageAccessToken };
     const url = `${readCommentsUrl}?${new URLSearchParams(params)}`;
     try {

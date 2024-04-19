@@ -4,7 +4,7 @@ import axios from 'axios';
 
 // Check if comment is eligible for auto-reply
 async function checkCommentEligibility(contentData, pageAccessToken) {
-    const commentUrl = `https://graph.facebook.com/v6.0/${contentData.id}/comments`;
+    const commentUrl = `https://graph.facebook.com/v19.0/${contentData.id}/comments`;
     const params = { access_token: pageAccessToken };
     const url = `${commentUrl}?${new URLSearchParams(params)}`;
     try {
@@ -37,7 +37,7 @@ async function getDetails(accessToken, url, parameter, valid, ID) {
 
 async function readComments(postID, pageAccessToken, commentMsg) {
     const comments = [];
-    const readCommentsUrl = `https://graph.facebook.com/v6.0/${postID}/comments`;
+    const readCommentsUrl = `https://graph.facebook.com/v19.0/${postID}/comments`;
     const params = { access_token: pageAccessToken };
     const url = `${readCommentsUrl}?${new URLSearchParams(params)}`;
     try {
@@ -55,9 +55,23 @@ async function readComments(postID, pageAccessToken, commentMsg) {
     }
 }
 
+// post comment reply 
+
+async function postCommentReply(postId, commentId, message, accessToken) {
+    const postUrl = `https://graph.facebook.com/${commentId}/comments?access_token=${accessToken}`;
+    try {
+        await axios.post(postUrl, { message });
+    } catch (error) {
+        throw new Error('Failed to post comment reply');
+    }
+}
+
+
+
 
 module.exports = {
     checkCommentEligibility,
     getDetails,
-    readComments
+    readComments,
+    postCommentReply
 }

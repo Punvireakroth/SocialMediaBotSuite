@@ -1,23 +1,42 @@
-import express from 'express';
-import configEngine from './config/viewEngine';
-import initWebRoutes from './routes/webhookRoutes';
-import bodyParser from 'body-parser'; 
-require('dotenv').config;
+const express = require('express');
+const configEngine = require('./config/viewEngine');
+const webhookRoutes = require('./routes/webhookRoutes');
+require('dotenv').config();
 
-let app = express();
+const app = express();
 
-// Add middleware to parse request bodies
-app.use(bodyParser.json());
-app.use(bodyParser.urlencoded({ extended: true }));
+// Middleware to parse JSON bodies
+app.use(express.json());
 
-// View ngine configuration
+// View engine configuration
 configEngine(app);
 
-initWebRoutes(app);
+// Mount routes
+app.use('/', webhookRoutes);
 
-
-let port = process.env.PORT || 8080;
-
-app.listen(port , () => {
-    console.log(`SERVER RUNNING ON PORT ${port}`)
+// Start server
+const PORT = process.env.PORT || 8080;
+app.listen(PORT, () => {
+    console.log(`Server running on port ${PORT}`);
 });
+
+
+// const express = require('express');
+// require('dotenv').config();
+
+// // Import routes
+// const webhookRoutes = require('./routes/webhookRoutes');
+
+// const app = express();
+
+// // Middleware to parse JSON bodies
+// app.use(express.json());
+
+// // Mount routes
+// app.use('/', webhookRoutes);
+
+// // Start server
+// const PORT = process.env.PORT || 8080;
+// app.listen(PORT, () => {
+//     console.log(`Server running on port ${PORT}`);
+// });

@@ -15,7 +15,7 @@ async function checkCommentEligibility(contentData, pageAccessToken) {
         console.error('Unable to connect. Check if session is still valid');
         return false;
     }
-}   
+}
 
 
 // Get detials from Facebook API
@@ -44,7 +44,7 @@ async function readComments(postID, pageAccessToken, commentMsg) {
         const response = await axios.get(url);
         const content = response.data;
         content.data.forEach(comment => {
-            if(comment.message === commentMsg && checkCommentEligibility(comment, pageAccessToken)) {
+            if (comment.message === commentMsg && checkCommentEligibility(comment, pageAccessToken)) {
                 comments.push(comment);
             }
         });
@@ -68,10 +68,26 @@ async function postCommentReply(postId, commentId, message, accessToken) {
 
 
 
+async function sendMessage(sender_psid, message) {
+    try {
+      await axios.post(`https://graph.facebook.com/v19.0/me/messages?access_token=${process.env.PAGE_ACCESS_TOKEN}`, {
+        recipient: {
+          id: sender_psid
+        },
+        message: {
+          text: message
+        }
+      });
+      console.log('Message sent successfully');
+    } catch (error) {
+      console.error('Unable to send message:', error);
+    }
+}
 
 module.exports = {
     checkCommentEligibility,
     getDetails,
     readComments,
-    postCommentReply
+    postCommentReply,
+    sendMessage
 }

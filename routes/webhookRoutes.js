@@ -14,30 +14,39 @@ let initWebRoutes = (app) => {
   });
 
 
-  // Endpoint for receiving Facebook webhook events
-  app.post('/webhook', async (req, res) => {
-    const body = req.body;
+  let replied = false;
 
-    if (body.object === 'page' && body.entry) {
-      for (const entry of body.entry) {
-        for (const change of entry.changes) {
-          if (change.value && change.value.item === 'comment' && change.value.verb === 'add') {
-            const comment = change.value;
-            console.log(comment.comment_id);
-            // Reply to the comment
-            try {
-              await facebookService.postCommentReply(comment.comment_id, 'Thank you for your comment!', process.env.FACEBOOK_PAGE_ACCESS_TOKEN);
+  app.post('/webhook', async (req, res) => {
+      const body = req.body;
+  
+      // Check if the server hasn't replied yet and the request is valid
+      if (!replied && body.object === 'page' && body.entry) {
+          try {
+              // Process webhook event and send reply
+              for (const entry of body.entry) {
+                  for (const change of entry.changes) {
+                      if (change.value && change.value.item === 'comment' && change.value.verb === 'add') {
+                          const commentId = change.value.comment_id;
+                          const pageAccessToken = process.env.FACEBOOK_PAGE_ACCESS_TOKEN;
+                          const message = 'Thank you for your comment! Please check your inbox. 📨';
+                          await facebookService.postCommentReply(commentId, message, pageAccessToken);
+                      }
+                  }
+              }
+              replied = true; // Set flag to true after sending reply
               console.log('Reply sent successfully.');
-            } catch (error) {
+  
+              // Reset replied flag after a timeout (e.g., 5 seconds)
+              setTimeout(() => {
+                  replied = false;
+                  console.log('Cooldown period expired. Ready to reply to new comments.');
+              }, 5000); // Adjust cooldown period as needed (in milliseconds)
+          } catch (error) {
               console.error('Failed to send reply:', error);
-            }
           }
-        }
       }
+  
       res.status(200).send('EVENT_RECEIVED');
-    } else {
-      res.sendStatus(404);
-    }
   });
   return app.use('/', router);
 }

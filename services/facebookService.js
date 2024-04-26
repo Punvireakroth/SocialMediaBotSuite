@@ -60,8 +60,10 @@ import axios from 'axios';
 async function postCommentReply(postId, commentId, message, accessToken) {
     const postUrl = `https://graph.facebook.com/${commentId}/comments?access_token=${accessToken}`;
     try {
-        await axios.post(postUrl, { message });
+        const response = await axios.post(postUrl, { message });
+        console.log('Comment reply posted successfully:', response.data);
     } catch (error) {
+        console.error('Failed to post comment reply:', error.response.data);
         throw new Error('Failed to post comment reply');
     }
 }

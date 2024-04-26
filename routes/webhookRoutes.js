@@ -23,9 +23,10 @@ let initWebRoutes = (app) => {
         for (const change of entry.changes) {
           if (change.value && change.value.item === 'comment' && change.value.verb === 'add') {
             const comment = change.value;
+            console.log(comment.comment_id);
             // Reply to the comment
             try {
-              await facebookService.postCommentReply(comment.post_id, comment.comment_id, 'Thank you for your comment!', process.env.PAGE_ACCESS_TOKEN);
+              await facebookService.postCommentReply(comment.comment_id, 'Thank you for your comment!', process.env.FACEBOOK_PAGE_ACCESS_TOKEN);
               console.log('Reply sent successfully.');
             } catch (error) {
               console.error('Failed to send reply:', error);

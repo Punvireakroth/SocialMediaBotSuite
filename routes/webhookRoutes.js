@@ -3,42 +3,47 @@ const router = express.Router();
 const facebookService = require('../services/facebookService');
 
 let initWebRoutes = (app) => {
-    router.get('/webhook', (req, res) => {
-        if (req.query['hub.mode'] === 'subscribe' &&
-            req.query['hub.verify_token'] === process.env.VERIFY_TOKEN) {
-            console.log('WEBHOOK_VERIFIED');
-            res.status(200).send(req.query['hub.challenge']);
-        } else {
-            res.sendStatus(403);
+  router.get('/webhook', (req, res) => {
+    if (req.query['hub.mode'] === 'subscribe' &&
+      req.query['hub.verify_token'] === process.env.VERIFY_TOKEN) {
+      console.log('WEBHOOK_VERIFIED');
+      res.status(200).send(req.query['hub.challenge']);
+    } else {
+      res.sendStatus(403);
+    }
+  });
+
+
+  // Endpoint for receiving Facebook webhook events
+  router.post('/webhook', async (req, res) => {
+    const body = req.body;
+
+    if (body.object === 'page' && body.entry) {
+      console.log(body.entry)
+      for (const entry of body.entry) {
+        for (const change of entry.changes) {
+          if (change.value && change.value.item === 'comment' && change.value.verb === 'add') {
+            const comment = change.value;
+            // Check if comment is eligible for auto-reply
+            const isEligible = await facebookService.checkCommentEligibility(comment, process.env.PAGE_ACCESS_TOKEN);
+            if (isEligible) {
+              // Auto-reply to the comment
+              try {
+                await facebookService.postCommentReply(comment.post_id, comment.comment_id, 'Thank you for your comment!', process.env.PAGE_ACCESS_TOKEN);
+                console.log('Auto-reply sent successfully.');
+              } catch (error) {
+                console.error('Failed to send auto-reply:', error);
+              }
+            }
+          }
         }
-    });
-
-
-    router.post('/webhook', (req, res) => {
-        let body = req.body;
-        if (body.object === 'page') {
-          body.entry.forEach((entry) => {
-            console.log(entry);
-            // let webhook_event = entry.messaging[0];
-            // console.log(webhook_event);
-            // console.log(entry);
-        
-            // console.log(entry.changes[0].value);
-      
-            // let sender_psid = webhook_event.sender.id;
-            // if (webhook_event.message)  {
-            //   await facebookService.sendMessage(sender_psid, "Thanks for your message!");
-            // } else if (webhook_event.comment) {
-            //   await facebookService.sendMessage(sender_psid, "Thanks for your comment!");
-            // }
-          });
-          res.status(200).send('EVENT_RECEIVED');
-        } else {
-          res.sendStatus(404);
-        }
-    });
-
-    return app.use('/', router);
+      }
+      res.status(200).send('EVENT_RECEIVED');
+    } else {
+      res.sendStatus(404);
+    }
+  });
+  return app.use('/', router);
 }
 
 module.exports = initWebRoutes;
@@ -46,7 +51,6 @@ module.exports = initWebRoutes;
 
 //     router.post('/webhook', async (req, res) => {
 //         const body = req.body;
-//         console.log(body);
 //         if (body.object === 'page') {
 //             // Iterate through each entry
 //             body.entry.forEach(async pageEntry => {

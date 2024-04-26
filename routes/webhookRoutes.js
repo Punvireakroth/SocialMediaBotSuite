@@ -15,25 +15,20 @@ let initWebRoutes = (app) => {
 
 
   // Endpoint for receiving Facebook webhook events
-  router.post('/webhook', async (req, res) => {
+  app.post('/webhook', async (req, res) => {
     const body = req.body;
 
     if (body.object === 'page' && body.entry) {
-      console.log(body.entry)
       for (const entry of body.entry) {
         for (const change of entry.changes) {
           if (change.value && change.value.item === 'comment' && change.value.verb === 'add') {
             const comment = change.value;
-            // Check if comment is eligible for auto-reply
-            const isEligible = await facebookService.checkCommentEligibility(comment, process.env.PAGE_ACCESS_TOKEN);
-            if (isEligible) {
-              // Auto-reply to the comment
-              try {
-                await facebookService.postCommentReply(comment.post_id, comment.comment_id, 'Thank you for your comment!', process.env.PAGE_ACCESS_TOKEN);
-                console.log('Auto-reply sent successfully.');
-              } catch (error) {
-                console.error('Failed to send auto-reply:', error);
-              }
+            // Reply to the comment
+            try {
+              await facebookService.postCommentReply(comment.post_id, comment.comment_id, 'Thank you for your comment!', process.env.PAGE_ACCESS_TOKEN);
+              console.log('Reply sent successfully.');
+            } catch (error) {
+              console.error('Failed to send reply:', error);
             }
           }
         }

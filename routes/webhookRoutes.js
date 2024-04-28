@@ -1,6 +1,8 @@
 const express = require('express');
 const router = express.Router();
 const facebookService = require('../services/facebookService');
+const translations = require('../utils/translations');
+const determineLanguage = require('../utils/languageUtils');
 
 let initWebRoutes = (app) => {
   router.get('/webhook', (req, res) => {
@@ -18,6 +20,7 @@ let initWebRoutes = (app) => {
 
   app.post('/webhook', async (req, res) => {
       const body = req.body;
+      // const language = determineLanguage(body); 
   
       // Check if the server hasn't replied yet and the request is valid
       if (!replied && body.object === 'page' && body.entry) {
@@ -29,13 +32,25 @@ let initWebRoutes = (app) => {
                       if (change.value && change.value.item === 'comment' && change.value.verb === 'add') {
                           const commentId = change.value.comment_id;
                           const pageAccessToken = process.env.FACEBOOK_PAGE_ACCESS_TOKEN;
+                          // multilingual 
+                          let language = determineLanguage(change.value.message);
+                          if(language == null) {
+                            language = 'kh'
+                          }
+                          console.log("-----------------");
+                          console.log(language);
+                          console.log("-----------------");
 
                           // Get this information to mention the user.
-                          const fromObject = change.value.from;
-                          const commenterId = fromObject.id;
-                          // console.log(entry.changes.value.from);
-                          const message = `@[${commenterId}] Thank you for your comment! Please check your inbox. 📨`
-                          await facebookService.postCommentReply(commentId, message, pageAccessToken);
+                          const userInfo = facebookService.extractUserInfo(change);
+
+                          if(userInfo) {
+                            const {commenterId} = userInfo;
+                            const message = `@[${commenterId}] ${translations[language].thankYouMessage}`;
+                            await facebookService.postCommentReply(commentId, message, pageAccessToken);
+                          } else {
+                            console.error('Failed to extract user information from comment.')
+                          }
                       }
                   }
               }

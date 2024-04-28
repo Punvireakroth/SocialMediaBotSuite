@@ -17,14 +17,23 @@ async function postCommentReply(commentId, message, accessToken) {
         const response = await axios.post(postUrl, { message });
         console.log('Comment reply posted successfully:', response.data);
         // Add the comment ID to the Set of replied comment IDs
-        repliedCommentIds.add(commentId);
     } catch (error) {
         console.error('Failed to post comment reply:', error.response.data);
         throw new Error('Failed to post comment reply');
     }
 }
 
+// Mention client name
+function extractUserInfo(comment) {
+    if(comment && comment.value && comment.value.from) {
+        const fromObject = comment.value.from;
+        const commenterId = fromObject.id;
+        return { commenterId };
+    }
+}
+
 
 module.exports = {
+    extractUserInfo,
     postCommentReply,
 }

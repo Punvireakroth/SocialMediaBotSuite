@@ -1,6 +1,6 @@
 require('dotenv').config();
 import request from 'request';
-import homepageService from './homepageService';
+import facebookService from './facebookService';
 import messageTemplate from './messageTemplate';
 
 
@@ -9,8 +9,8 @@ import messageTemplate from './messageTemplate';
 let sendMessage = (sender_psid, response) => {
     return new Promise(async (resolve, reject) => {
         try {
-            await homepageService.markMessageRead(sender_psid);
-            await homepageService.sendTypingOn(sender_psid);
+            await facebookService.markMessageRead(sender_psid);
+            await facebookService.sendTypingOn(sender_psid);
             // Construct the message body
             let request_body = {
                 "recipient": {
@@ -43,7 +43,7 @@ let sendMessage = (sender_psid, response) => {
 let handleFirstUser = (sender_psid, response) => {
     return new Promise(async (resolve, reject) => {
         try {
-            let username = await homepageService.getUserName(sender_psid);
+            let username = await facebookService.getUserName(sender_psid);
             let firstResponse = {
                 "text": `👋 សួស្ដី, ${username} ❤️! អរគុណសម្រាប់ការទំនាក់ទំនងមកកាន់យើងខ្ញុំ 🤔 \n\n តើមានអ្វីខ្ញុំអាចជួយអ្នកបាន?`
             };

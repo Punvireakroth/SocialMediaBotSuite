@@ -9,9 +9,9 @@ let initWebRoutes = (app) => {
 
   router.post('/webhook', facebookController.postWebhook);
 
-  router.post('/set-up-profile', facebookController.handleSetupProfile);
-
   router.get('/set-up-profile', facebookController.getSetupProfilePage);
+
+  router.post('/set-up-profile', facebookController.handleSetupProfile);
 
   router.get('/info-register', facebookController.getInfoRegisterPage);
 

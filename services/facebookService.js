@@ -168,4 +168,8 @@ let markMessageRead = (sender_psid) => {
 module.exports = {
     extractUserInfo,
     postCommentReply,
+    handleSetupProfileAPI,
+    getUserName,
+    sendTypingOn,
+    markMessageRead,
 }

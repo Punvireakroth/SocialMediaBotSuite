@@ -1,6 +1,7 @@
 require('dotenv').config();
 
 const facebookService = require('../services/facebookService');
+const chatbotService = require('../services/chatbotService');
 const translations = require('../utils/translations');
 const determineLanguage = require('../utils/languageUtils');
 
@@ -106,13 +107,14 @@ let getHomePage = (req, res) => {
 
 let handleSetupProfile = async (req, res) => {
     try {
-        await homepageService.handleSetupProfileAPI();
+        await facebookService.handleSetupProfileAPI();
+        console.log('Set up Sucess')
         return res.redirect('/');
     } catch (e) {
         console.log(e);
     }
 
-    await homepageService.handleSetupProfileAPI();
+    await facebookService.handleSetupProfileAPI();
 }
 
 let getSetupProfilePage = (req, res) => {

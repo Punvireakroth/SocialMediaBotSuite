@@ -3,8 +3,10 @@ const router = express.Router();
 import facebookController from '../controllers/facebookController';
 
 let initWebRoutes = (app) => {
+  router.get('/', facebookController.getHomePage);
+
   router.get('/webhook', facebookController.getWebhook);
-  
+
   router.post('/webhook', facebookController.postWebhook);
 
   router.post('/set-up-profile', facebookController.handleSetupProfile);

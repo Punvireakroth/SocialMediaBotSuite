@@ -19,22 +19,21 @@ let replied = false;
 
 let postWebhook = async (req, res) => {
     const body = req.body;
-    // const language = determineLanguage(body); 
 
     // Check if the server hasn't replied yet and the request is valid
     if (!replied && body.object === 'page' && body.entry) {
         try {
             // Process webhook event and send reply
             for (const entry of body.entry) {
-              console.log(entry.changes);
+                //   console.log(entry.changes);
                 for (const change of entry.changes) {
                     if (change.value && change.value.item === 'comment' && change.value.verb === 'add') {
                         const commentId = change.value.comment_id;
                         const pageAccessToken = process.env.FACEBOOK_PAGE_ACCESS_TOKEN;
                         // multilingual 
                         let language = determineLanguage(change.value.message);
-                        if(language == null) {
-                          language = 'kh'
+                        if (language == null) {
+                            language = 'kh'
                         }
                         console.log("-----------------");
                         console.log(language);
@@ -43,12 +42,12 @@ let postWebhook = async (req, res) => {
                         // Get this information to mention the user.
                         const userInfo = facebookService.extractUserInfo(change);
 
-                        if(userInfo) {
-                          const {commenterId} = userInfo;
-                          const message = `@[${commenterId}] ${translations[language].thankYouMessage}`;
-                          await facebookService.postCommentReply(commentId, message, pageAccessToken);
+                        if (userInfo) {
+                            const { commenterId } = userInfo;
+                            const message = `@[${commenterId}] ${translations[language].thankYouMessage}`;
+                            await facebookService.postCommentReply(commentId, message, pageAccessToken);
                         } else {
-                          console.error('Failed to extract user information from comment.')
+                            console.error('Failed to extract user information from comment.')
                         }
                     }
                 }
@@ -65,12 +64,41 @@ let postWebhook = async (req, res) => {
             console.error('Failed to send reply:', error);
         }
     }
+    // Checks if this is an event from a page subscription
+    if (body.object === 'page') {
 
-    res.status(200).send('EVENT_RECEIVED');
+        // Iterates over each entry - there may be multiple if batched
+        body.entry.forEach(function (entry) {
+
+            // Gets the body of the webhook event
+            let webhookEvent = entry.messaging[0];
+            console.log(webhookEvent);
+
+            // Get the sender PSID
+            let senderPsid = webhookEvent.sender.id;
+            console.log('Sender PSID: ' + senderPsid);
+
+            // Check if the event is a message or postback and
+            // pass the event to the appropriate handler function
+            if (webhookEvent.message) {
+                handleMessage(senderPsid, webhookEvent.message);
+            } else if (webhookEvent.postback) {
+                handlePostback(senderPsid, webhookEvent.postback);
+            }
+        });
+
+        // Returns a '200 OK' response to all requests
+        res.status(200).send('EVENT_RECEIVED');
+    } else {
+
+        // Returns a '404 Not Found' if event is not from a page subscription
+        res.sendStatus(404);
+    }
 }
 
 
-// setup facebook profile for messenger platform
+
+// --------------********************setup facebook profile for messenger platform********************-------------------
 
 let getHomePage = (req, res) => {
     return res.render("homepage.ejs");
@@ -80,7 +108,7 @@ let handleSetupProfile = async (req, res) => {
     try {
         await homepageService.handleSetupProfileAPI();
         return res.redirect('/');
-    } catch(e) {
+    } catch (e) {
         console.log(e);
     }
 
@@ -98,19 +126,19 @@ let getInfoRegisterPage = (req, res) => {
 
 // Handle messages events
 
-let handleMessage = async (sender_psid, received_message) =>{
+let handleMessage = async (sender_psid, received_message) => {
     // Check if incoming message is a quick reply 
-    if(received_message && received_message.quick_reply && received_message.quick_reply.payload) {
+    if (received_message && received_message.quick_reply && received_message.quick_reply.payload) {
         let payload = received_message.quick_reply.payload;
-        if(payload === 'LEARN_MORE') {
+        if (payload === 'LEARN_MORE') {
             await chatbotService.sendLearnMore(sender_psid);
-        }else if(payload === 'REGISTER_USER') {
+        } else if (payload === 'REGISTER_USER') {
             await chatbotService.sendLookupRegister(sender_psid);
-        } else if(payload === 'TALK_AGENT') {
+        } else if (payload === 'TALK_AGENT') {
             await chatbotService.requestTalkToAgent(sender_psid);
         }
         return;
-    } 
+    }
 
 
     let response;
@@ -137,15 +165,15 @@ let handleMessage = async (sender_psid, received_message) =>{
                         "subtitle": "Tap a button to answer.",
                         "image_url": attachment_url,
                         "buttons": [{
-                                "type": "postback",
-                                "title": "Yes!",
-                                "payload": "yes",
-                            },
-                            {
-                                "type": "postback",
-                                "title": "No!",
-                                "payload": "no",
-                            }
+                            "type": "postback",
+                            "title": "Yes!",
+                            "payload": "yes",
+                        },
+                        {
+                            "type": "postback",
+                            "title": "No!",
+                            "payload": "no",
+                        }
                         ],
                     }]
                 }
@@ -160,12 +188,12 @@ let handleMessage = async (sender_psid, received_message) =>{
 // Handles messaging_postbacks events (When the user click on facebook button)
 let handlePostback = async (sender_psid, received_postback) => {
     let response;
-  
-  // Get the payload for the postback
-  let payload = received_postback.payload;
 
-  // Set the response based on the postback payload
-    switch(payload) {
+    // Get the payload for the postback
+    let payload = received_postback.payload;
+
+    // Set the response based on the postback payload
+    switch (payload) {
         case 'GET_STARTED':
             await chatbotService.handleFirstUser(sender_psid);
             break;
@@ -193,7 +221,7 @@ let handlePostback = async (sender_psid, received_postback) => {
             console.log('Run default switch case');
 
     }
-  // Send the message to acknowledge the postback
+    // Send the message to acknowledge the postback
     await chatbotService.sendMessage(sender_psid, response);
 }
 
@@ -206,4 +234,5 @@ module.exports = {
     getInfoRegisterPage,
     getHomePage,
     handleMessage,
+    handlePostback
 }

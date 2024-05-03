@@ -4,7 +4,14 @@ import facebookController from '../controllers/facebookController';
 
 let initWebRoutes = (app) => {
   router.get('/webhook', facebookController.getWebhook);
+  
   router.post('/webhook', facebookController.postWebhook);
+
+  router.post('/set-up-profile', facebookController.handleSetupProfile);
+
+  router.get('/set-up-profile', facebookController.getSetupProfilePage);
+
+  router.get('/info-register', facebookController.getInfoRegisterPage);
 
   return app.use('/', router);
 }

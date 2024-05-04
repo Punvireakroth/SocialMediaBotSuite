@@ -4,6 +4,8 @@ const facebookService = require('../services/facebookService');
 const chatbotService = require('../services/chatbotService');
 const translations = require('../utils/translations');
 const determineLanguage = require('../utils/languageUtils');
+import messageTemplate from '../services/messageTemplate';
+
 
 
 let getWebhook = (req, res) => {
@@ -16,86 +18,171 @@ let getWebhook = (req, res) => {
     }
 };
 
+// let replied = false;
+
+// let postWebhook = async (req, res) => {
+//     const body = req.body;
+
+//     // Check if the server hasn't replied yet and the request is valid
+//     if (!replied && body.object === 'page' && body.entry) {
+//         try {
+//             // Process webhook event and send reply
+//             for (const entry of body.entry) {
+//                 // Iterate through each change in the entry
+//                 for (const change of entry.changes) {
+//                     if (change.value && change.value.item === 'comment' && change.value.verb === 'add') {
+//                         const commentId = change.value.comment_id;
+//                         const pageAccessToken = process.env.FACEBOOK_PAGE_ACCESS_TOKEN;
+
+//                         // Extract user ID of the commenter
+//                         const commentersId = change.value.from.id;
+
+//                         // multilingual 
+//                         let language = determineLanguage(change.value.message);
+//                         if (language == null) {
+//                             language = 'kh';
+//                         }
+
+//                         // Get user information to mention the user.
+//                         const userInfo = facebookService.extractUserInfo(change);
+
+//                         if (userInfo) {
+//                             const { commenterId } = userInfo;
+//                             const message = `@[${commenterId}] ${translations[language].thankYouMessage}`;
+
+//                             // Post comment reply
+//                             await facebookService.postCommentReply(commentId, message, pageAccessToken);
+
+//                             // Direct chat with the user
+//                             const replyMessage = messageTemplate.sendLearnMoreTemplate();
+//                             await chatbotService.sendMessage(commentersId, replyMessage );
+//                         } else {
+//                             console.error('Failed to extract user information from comment.');
+//                         }
+//                     }
+//                 }
+//             }
+
+//             // Set flag to true after sending replies to all comments
+//             replied = true;
+//             console.log('Reply sent successfully.');
+
+//             // Reset replied flag after a timeout (e.g., 5 seconds)
+//             setTimeout(() => {
+//                 replied = false;
+//                 console.log('Cooldown period expired. Ready to reply to new comments.');
+//             }, 5000); // Adjust cooldown period as needed (in milliseconds)
+//         } catch (error) {
+//             console.error('Failed to send reply:', error);
+//         }
+//     }
+// };
+
+
 let replied = false;
 
-let postWebhook = async (req, res) => {
-    const body = req.body;
-
+// Function to handle post webhook events
+let handlePostWebhook = async (body) => {
     // Check if the server hasn't replied yet and the request is valid
     if (!replied && body.object === 'page' && body.entry) {
         try {
             // Process webhook event and send reply
             for (const entry of body.entry) {
-                //   console.log(entry.changes);
+                // Iterate through each change in the entry
                 for (const change of entry.changes) {
                     if (change.value && change.value.item === 'comment' && change.value.verb === 'add') {
                         const commentId = change.value.comment_id;
                         const pageAccessToken = process.env.FACEBOOK_PAGE_ACCESS_TOKEN;
+
+                        // Extract user ID of the commenter
+                        const commentersId = change.value.from.id;
+
                         // multilingual 
                         let language = determineLanguage(change.value.message);
                         if (language == null) {
-                            language = 'kh'
+                            language = 'kh';
                         }
-                        console.log("-----------------");
-                        console.log(language);
-                        console.log("-----------------");
 
-                        // Get this information to mention the user.
+                        // Get user information to mention the user.
                         const userInfo = facebookService.extractUserInfo(change);
 
                         if (userInfo) {
                             const { commenterId } = userInfo;
                             const message = `@[${commenterId}] ${translations[language].thankYouMessage}`;
+
+                            // Post comment reply
                             await facebookService.postCommentReply(commentId, message, pageAccessToken);
+
+                            // Direct chat with the user
+                            const replyMessage = messageTemplate.sendLearnMoreTemplate();
+                            await chatbotService.sendMessage(commentersId, replyMessage);
                         } else {
-                            console.error('Failed to extract user information from comment.')
+                            console.error('Failed to extract user information from comment.');
                         }
                     }
                 }
             }
-            replied = true; // Set flag to true after sending reply
-            console.log('Reply sent successfully.');
 
-            // Reset replied flag after a timeout (e.g., 5 seconds)
-            setTimeout(() => {
-                replied = false;
-                console.log('Cooldown period expired. Ready to reply to new comments.');
-            }, 5000); // Adjust cooldown period as needed (in milliseconds)
+            console.log('Reply sent successfully.');
         } catch (error) {
             console.error('Failed to send reply:', error);
         }
     }
-    // Checks if this is an event from a page subscription
-    if (body.object === 'page') {
+};
 
-        // Iterates over each entry - there may be multiple if batched
-        body.entry.forEach(function (entry) {
+// Webhook endpoint
+let postWebhook = (req, res) => {
+    const body = req.body;
 
-            // Gets the body of the webhook event
-            let webhookEvent = entry.messaging[0];
-            console.log(webhookEvent);
+    // Handle the webhook event
+    handlePostWebhook(body);
 
-            // Get the sender PSID
-            let senderPsid = webhookEvent.sender.id;
-            console.log('Sender PSID: ' + senderPsid);
+    // Set replied flag to true
+    replied = true;
 
-            // Check if the event is a message or postback and
-            // pass the event to the appropriate handler function
-            if (webhookEvent.message) {
-                handleMessage(senderPsid, webhookEvent.message);
-            } else if (webhookEvent.postback) {
-                handlePostback(senderPsid, webhookEvent.postback);
-            }
-        });
+    // Reset replied flag after a timeout (e.g., 5 seconds)
+    setTimeout(() => {
+        replied = false;
+        console.log('Cooldown period expired. Ready to reply to new comments.');
+    }, 5000); // Adjust cooldown period as needed (in milliseconds)
 
-        // Returns a '200 OK' response to all requests
-        res.status(200).send('EVENT_RECEIVED');
-    } else {
+    // Send response to Facebook
+    res.status(200).send('EVENT_RECEIVED');
+};
 
-        // Returns a '404 Not Found' if event is not from a page subscription
-        res.sendStatus(404);
-    }
-}
+
+//      // Checks if this is an event from a page subscription
+//      if (body.object === 'page' && replied) {
+
+//         // Iterates over each entry - there may be multiple if batched
+//         body.entry.forEach(function (entry) {
+
+//             // Gets the body of the webhook event
+//             let webhookEvent = entry.messaging[0];
+//             console.log(webhookEvent);
+
+//             // Get the sender PSID
+//             let senderPsid = webhookEvent.sender.id;
+//             console.log('Sender PSID: ' + senderPsid);
+
+//             // Check if the event is a message or postback and
+//             // pass the event to the appropriate handler function
+//             if (webhookEvent.message) {
+//                 handleMessage(senderPsid, webhookEvent.message);
+//             } else if (webhookEvent.postback) {
+//                 handlePostback(senderPsid, webhookEvent.postback);
+//             }
+//         });
+
+//         // Returns a '200 OK' response to all requests
+//         res.status(200).send('EVENT_RECEIVED');
+//     } else {
+
+//         // Returns a '404 Not Found' if event is not from a page subscription
+//         res.sendStatus(404);
+//     }
+
+
 
 
 

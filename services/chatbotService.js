@@ -40,6 +40,42 @@ let sendMessage = (sender_psid, response) => {
     });
 };
 
+
+
+// Sends response messages via the Send API
+let sendDirectMessage = (recipientId, message) => {
+    return new Promise((resolve, reject) => {
+        try {
+            // Construct the message body
+            let requestBody = {
+                recipient: {
+                    id: recipientId
+                },
+                message: message
+            };
+
+            // Send the HTTP request to the Messenger Platform
+            request({
+                uri: 'https://graph.facebook.com/v6.0/me/messages',
+                qs: {
+                    access_token: process.env.PAGE_ACCESS_TOKEN
+                },
+                method: 'POST',
+                json: requestBody
+            }, (err, res, body) => {
+                if (!err && res.statusCode === 200) {
+                    resolve('Message sent successfully!');
+                } else {
+                    reject('Unable to send message:' + err);
+                }
+            });
+        } catch (error) {
+            reject(error);
+        }
+    });
+};
+
+
 let handleFirstUser = (sender_psid, response) => {
     return new Promise(async (resolve, reject) => {
         try {
@@ -198,6 +234,7 @@ let requestTalkToAgent = (sender_psid) => {
 
 module.exports = {
     sendMessage,
+    sendDirectMessage,
     handleFirstUser,
     sendLearnMore,
     requestTalkToAgent,

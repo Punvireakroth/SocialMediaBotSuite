@@ -1,4 +1,16 @@
-## To SETUP
+# 📬 Facebook Auto Responder
+This bot automatically performs various tasks which can automat marketing process.
+
+## ✨ Features
+
+- 🚀 Auto respond to any direct comments of your Facebook page posts.
+- 📩 Send direct custom text messages to users.
+- 🕒 Adjustable wait time between responses.
+- 📁 Multilingual support.
+- 🔒 Bot which can handle basic sale to costumers.
+
+
+## 🚀 Getting Started
 - `git clone https://github.com/Punvireakroth/AutomateSalesBot.git`
 - `npm i`
 - `npm start`

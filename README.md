@@ -25,3 +25,8 @@ PAGE_ID='TO FILL IN'
 POST_ID_TO_MONITOR='TO FILL IN'
 PERMANENT_TOKEN='TO FILL IN'
 ```
+
+## 📝 License
+
+Copyright © 2024 [Punvireakroth](https://github.com/Punvireakroth).
+This project is [MIT](https://choosealicense.com/licenses/mit/) licensed.

@@ -18,137 +18,10 @@ let getWebhook = (req, res) => {
     }
 };
 
-// let replied = false;
-
-// let postWebhook = async (req, res) => {
-//     const body = req.body;
-
-//     // Check if the server hasn't replied yet and the request is valid
-//     if (!replied && body.object === 'page' && body.entry) {
-//         try {
-//             // Process webhook event and send reply
-//             for (const entry of body.entry) {
-//                 // Iterate through each change in the entry
-//                 for (const change of entry.changes) {
-//                     if (change.value && change.value.item === 'comment' && change.value.verb === 'add') {
-//                         const commentId = change.value.comment_id;
-//                         const pageAccessToken = process.env.FACEBOOK_PAGE_ACCESS_TOKEN;
-
-//                         // Extract user ID of the commenter
-//                         const commentersId = change.value.from.id;
-
-//                         // multilingual 
-//                         let language = determineLanguage(change.value.message);
-//                         if (language == null) {
-//                             language = 'kh';
-//                         }
-
-//                         // Get user information to mention the user.
-//                         const userInfo = facebookService.extractUserInfo(change);
-
-//                         if (userInfo) {
-//                             const { commenterId } = userInfo;
-//                             const message = `@[${commenterId}] ${translations[language].thankYouMessage}`;
-
-//                             // Post comment reply
-//                             await facebookService.postCommentReply(commentId, message, pageAccessToken);
-
-//                             // Direct chat with the user
-//                             const replyMessage = messageTemplate.sendLearnMoreTemplate();
-//                             await chatbotService.sendMessage(commentersId, replyMessage );
-//                         } else {
-//                             console.error('Failed to extract user information from comment.');
-//                         }
-//                     }
-//                 }
-//             }
-
-//             // Set flag to true after sending replies to all comments
-//             replied = true;
-//             console.log('Reply sent successfully.');
-
-//             // Reset replied flag after a timeout (e.g., 5 seconds)
-//             setTimeout(() => {
-//                 replied = false;
-//                 console.log('Cooldown period expired. Ready to reply to new comments.');
-//             }, 5000); // Adjust cooldown period as needed (in milliseconds)
-//         } catch (error) {
-//             console.error('Failed to send reply:', error);
-//         }
-//     }
-// };
 
 
-let replied = false;
 
-// Function to handle post webhook events
-let handlePostWebhook = async (body) => {
-    // Check if the server hasn't replied yet and the request is valid
-    if (!replied && body.object === 'page' && body.entry) {
-        try {
-            // Process webhook event and send reply
-            for (const entry of body.entry) {
-                // Iterate through each change in the entry
-                for (const change of entry.changes) {
-                    if (change.value && change.value.item === 'comment' && change.value.verb === 'add') {
-                        const commentId = change.value.comment_id;
-                        const pageAccessToken = process.env.FACEBOOK_PAGE_ACCESS_TOKEN;
-
-                        // Extract user ID of the commenter
-                        const commentersId = change.value.from.id;
-
-                        // multilingual 
-                        let language = determineLanguage(change.value.message);
-                        if (language == null) {
-                            language = 'kh';
-                        }
-
-                        // Get user information to mention the user.
-                        const userInfo = facebookService.extractUserInfo(change);
-
-                        if (userInfo) {
-                            const { commenterId } = userInfo;
-                            const message = `@[${commenterId}] ${translations[language].thankYouMessage}`;
-
-                            // Post comment reply
-                            await facebookService.postCommentReply(commentId, message, pageAccessToken);
-
-                            // Direct chat with the user
-                            const replyMessage = messageTemplate.sendLearnMoreTemplate();
-                            await chatbotService.sendMessage(commentersId, replyMessage);
-                        } else {
-                            console.error('Failed to extract user information from comment.');
-                        }
-                    }
-                }
-            }
-
-            console.log('Reply sent successfully.');
-        } catch (error) {
-            console.error('Failed to send reply:', error);
-        }
-    }
-};
-
-// Webhook endpoint
-let postWebhook = (req, res) => {
-    const body = req.body;
-
-    // Handle the webhook event
-    handlePostWebhook(body);
-
-    // Set replied flag to true
-    replied = true;
-
-    // Reset replied flag after a timeout (e.g., 5 seconds)
-    setTimeout(() => {
-        replied = false;
-        console.log('Cooldown period expired. Ready to reply to new comments.');
-    }, 5000); // Adjust cooldown period as needed (in milliseconds)
-
-    // Send response to Facebook
-    res.status(200).send('EVENT_RECEIVED');
-};
+// -------------------**************** END ************--------------------
 
 
 //      // Checks if this is an event from a page subscription
@@ -186,7 +59,7 @@ let postWebhook = (req, res) => {
 
 
 
-// --------------********************setup facebook profile for messenger platform********************-------------------
+// --------------********************setup facebook profile for messenger platform ********************-------------------
 
 let getHomePage = (req, res) => {
     return res.render("homepage.ejs");
@@ -317,7 +190,6 @@ let handlePostback = async (sender_psid, received_postback) => {
 
 module.exports = {
     getWebhook,
-    postWebhook,
     handleSetupProfile,
     getSetupProfilePage,
     getInfoRegisterPage,

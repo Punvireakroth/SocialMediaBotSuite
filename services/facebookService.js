@@ -6,7 +6,7 @@ import request from 'request';
 // Maintain a Set to store replied comment IDs
 const repliedCommentIds = new Set();
 
-async function postCommentReply(commentId, message, accessToken) {
+async function postCommentReply(commentId, message, commentMessage, accessToken) {
     // Check if the comment ID has already been replied to
     if (repliedCommentIds.has(commentId)) {
         console.log('Comment already replied to:', commentId);
@@ -17,11 +17,22 @@ async function postCommentReply(commentId, message, accessToken) {
     console.log(postUrl);
     try {
         const response = await axios.post(postUrl, { message });
-        console.log('Comment reply posted successfully:', response.data);
+        console.log(`Comment reply posted successfully to: ${commentMessage}`, response.data);
         // Add the comment ID to the Set of replied comment IDs
+        repliedCommentIds.add(commentId);
     } catch (error) {
-        console.error('Failed to post comment reply:', error.response.data);
-        throw new Error('Failed to post comment reply');
+        if (
+            error.response &&
+            error.response.data &&
+            error.response.data.error &&
+            error.response.data.error.error_subcode === 33
+        ) {
+            // Ignore the error if it's due to the comment already being replied to
+            console.log('Comment already replied to:', commentId);
+        } else {
+            console.error('Failed to post comment reply:', error.response.data);
+            throw new Error('Failed to post comment reply');
+        }
     }
 }
 

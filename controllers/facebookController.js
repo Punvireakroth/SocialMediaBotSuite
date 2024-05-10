@@ -2,9 +2,9 @@ require('dotenv').config();
 
 const facebookService = require('../services/facebookService');
 const chatbotService = require('../services/chatbotService');
-const translations = require('../utils/translations');
-const determineLanguage = require('../utils/languageUtils');
-import messageTemplate from '../services/messageTemplate';
+// const translations = require('../utils/translations');
+// const determineLanguage = require('../utils/languageUtils');
+// import messageTemplate from '../services/messageTemplate';
 
 
 

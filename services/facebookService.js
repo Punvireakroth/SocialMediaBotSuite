@@ -75,7 +75,7 @@ let handleSetupProfileAPI = () => {
                     }
                 ],
                 "whitelisted_domains": [
-                    "https://3e30-143-110-219-93.ngrok-free.app/",
+                    "https://e52c-2a07-23c0-9-00-682a.ngrok-free.app/",
 
                 ],
 

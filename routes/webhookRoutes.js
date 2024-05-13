@@ -53,31 +53,28 @@ let initWebRoutes = (app) => {
 
               if (userInfo) {
                 const { commenterId } = userInfo;
-                if ( commentSentiment.score >= 2 || commentSentiment.score >= 1) {
+                if (commentSentiment.score >= 2 || commentSentiment.score >= 1) {
                   // Express interest in the product
                   replyMessage = `@[${commenterId}] ${translations[language].interestResponse}`;
                   // Send direct message for expressing interest
                   const directMessage = messageTemplate.sendLearnMoreTemplate();
                   await chatbotService.sendMessage(commentersId, directMessage);
                 }
-                 else if (commentSentiment.score > 0) {
+                else if (commentSentiment.score > 0) {
                   // Positive sentiment: Thank the user
                   replyMessage = `@[${commenterId}] ${translations[language].thankYouMessage}`;
-                } else if ( commentSentiment.score < 0) {
+                } else if (commentSentiment.score < 0) {
+                  // Send sorry image 
+                  // Reply comment with a gratitude message
+                  const imageUrl = "https://helpx.adobe.com/content/dam/help/en/photoshop/using/convert-color-image-black-white/jcr_content/main-pars/before_and_after/image-before/Landscape-Color.jpg";
                   // Negative sentiment: Adress complaint/feedback
                   const directMessage = messageTemplate.sendFeedbackTemplate();
                   replyMessage = `@[${commenterId}] ${translations[language].complaintResponse}`;
+                  await facebookService.postCommentReply(commentId, replyMessage, commentMessage, pageAccessToken, imageUrl);
                   // Direct message to make up the user ecompliant
                   await chatbotService.sendMessage(commentersId, directMessage);
-                } else if ( commentSentiment.score >= 2 || commentSentiment.score >= 1) {
-                  // Express interest in the product
-                  replyMessage = `@[${commenterId}] ${translations[language].interestResponse}`;
-                  // Send direct message for expressing interest
-                  const directMessage = messageTemplate.sendLearnMoreTemplate();
-                  await chatbotService.sendMessage(commentersId, directMessage);
                 }
-
-                await facebookService.postCommentReply(commentId, replyMessage, commentMessage, pageAccessToken);
+                // await facebookService.postCommentReply(commentId, replyMessage, commentMessage, pageAccessToken);
 
               } else {
                 console.error('Failed to extract user information from comment.')

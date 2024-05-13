@@ -6,7 +6,7 @@ import request from 'request';
 // Maintain a Set to store replied comment IDs
 const repliedCommentIds = new Set();
 
-async function postCommentReply(commentId, message, commentMessage, accessToken) {
+async function postCommentReply(commentId, message, commentMessage, accessToken, imageUrl) {
     // Check if the comment ID has already been replied to
     if (repliedCommentIds.has(commentId)) {
         console.log('Comment already replied to:', commentId);
@@ -14,10 +14,25 @@ async function postCommentReply(commentId, message, commentMessage, accessToken)
     }
 
     const postUrl = `https://graph.facebook.com/${commentId}/comments?access_token=${accessToken}`;
-    console.log(postUrl);
+
     try {
-        const response = await axios.post(postUrl, { message });
-        console.log(`Comment reply posted successfully to: ${commentMessage}`, response.data);
+        const attachment = {
+            "attachment": {
+                "type": "image",
+                "payload": {
+                    "url": imageUrl,
+                    "is_reusable": true
+                }
+            }
+        };
+
+        const payload = {
+            message: message,
+            attachment: attachment
+        };
+
+        const response = await axios.post(postUrl, payload);
+        console.log('Comment reply posted successfully to:', commentMessage, response.data);
         // Add the comment ID to the Set of replied comment IDs
         repliedCommentIds.add(commentId);
     } catch (error) {

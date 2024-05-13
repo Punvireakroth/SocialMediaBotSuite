@@ -5,6 +5,7 @@ This bot automatically performs various tasks which can automat marketing proces
 
 - 🚀 Auto respond to any direct comments of your Facebook page posts.
 - 📩 Send direct custom text messages to users.
+- 🌼 Personalize sentimental messages
 - 🕒 Adjustable wait time between responses.
 - 📁 Multilingual support.
 - 🔒 Bot which can handle basic sale to costumers.

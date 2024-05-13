@@ -6,6 +6,9 @@ const determineLanguage = require('../utils/languageUtils');
 const facebookController = require('../controllers/facebookController');
 const chatbotService = require('../services/chatbotService');
 const messageTemplate = require('../services/messageTemplate');
+const Sentiment = require('sentiment');
+
+const sentiment = new Sentiment();
 
 let initWebRoutes = (app) => {
   router.get('/', facebookController.getHomePage);
@@ -26,35 +29,56 @@ let initWebRoutes = (app) => {
         for (const entry of body.entry) {
           for (const change of entry.changes) {
             const commentMessage = change.value.message
+
             if (change.value && change.value.item === 'comment' && change.value.verb === 'add') {
               const commentId = change.value.comment_id;
               const pageAccessToken = process.env.FACEBOOK_PAGE_ACCESS_TOKEN;
               // Extract user ID of the commenter
               const commentersId = change.value.from.id;
-              console.log(commentersId);
+
+              // Perform sentiment analysis on the comment
+              const commentSentiment = sentiment.analyze(commentMessage);
+              console.log(commentSentiment);
+
               // multilingual 
               let language = determineLanguage(change.value.message);
               if (language == null) {
                 language = 'kh'
               }
-              console.log("-----------------");
-              console.log(language);
-              console.log("-----------------");
+
+              let replyMessage;
 
               // Get this information to mention the user.
               const userInfo = facebookService.extractUserInfo(change);
 
               if (userInfo) {
                 const { commenterId } = userInfo;
-                const message = `@[${commenterId}] ${translations[language].thankYouMessage}`;
-               
-                await facebookService.postCommentReply(commentId, message, commentMessage, pageAccessToken);
+                if ( commentSentiment.score >= 2 || commentSentiment.score >= 1) {
+                  // Express interest in the product
+                  replyMessage = `@[${commenterId}] ${translations[language].interestResponse}`;
+                  // Send direct message for expressing interest
+                  const directMessage = messageTemplate.sendLearnMoreTemplate();
+                  await chatbotService.sendMessage(commentersId, directMessage);
+                }
+                 else if (commentSentiment.score > 0) {
+                  // Positive sentiment: Thank the user
+                  replyMessage = `@[${commenterId}] ${translations[language].thankYouMessage}`;
+                } else if ( commentSentiment.score < 0) {
+                  // Negative sentiment: Adress complaint/feedback
+                  const directMessage = messageTemplate.sendFeedbackTemplate();
+                  replyMessage = `@[${commenterId}] ${translations[language].complaintResponse}`;
+                  // Direct message to make up the user ecompliant
+                  await chatbotService.sendMessage(commentersId, directMessage);
+                } else if ( commentSentiment.score >= 2 || commentSentiment.score >= 1) {
+                  // Express interest in the product
+                  replyMessage = `@[${commenterId}] ${translations[language].interestResponse}`;
+                  // Send direct message for expressing interest
+                  const directMessage = messageTemplate.sendLearnMoreTemplate();
+                  await chatbotService.sendMessage(commentersId, directMessage);
+                }
 
+                await facebookService.postCommentReply(commentId, replyMessage, commentMessage, pageAccessToken);
 
-                // Send a direct message to the user
-                const replyMessage = messageTemplate.sendLearnMoreTemplate();
-
-                await chatbotService.sendMessage(commentersId, replyMessage);
               } else {
                 console.error('Failed to extract user information from comment.')
               }

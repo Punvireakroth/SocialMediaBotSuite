@@ -75,6 +75,28 @@ let sendLearnMoreTemplate = () => {
     return response;
 };
 
+let sendFeedbackTemplate = () => {
+    let response = {
+        "attachment": {
+            "type": "template",
+            "payload": {
+                "template_type": "button",
+                "text": "We sincerely apologize for falling short of your expectations and would love to hear how we can improve your experience. ",
+                "buttons": [
+                    {
+                        "type": "postback",
+                        "title": "Talk to Agent",
+                        "payload": "ASK_PRICE"
+                    }
+                ]
+            }
+        }
+    }
+
+
+    return response;
+}
+
 
 let handleProductDetialTemplate = () => {
 
@@ -200,5 +222,6 @@ module.exports = {
     handleProductDetialTemplate,
     requestPricesOptionsTemplate,
     vendorInformationTemplate,
+    sendFeedbackTemplate,
     sendLookupRegisterTemplate,
 };

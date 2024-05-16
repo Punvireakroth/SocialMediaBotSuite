@@ -53,7 +53,7 @@ let initWebRoutes = (app) => {
 
               if (userInfo) {
                 const { commenterId } = userInfo;
-                if (commentSentiment.score >= 2 || commentSentiment.score >= 1) {
+                if (commentSentiment.score >= 2 && commentSentiment.score >= 1) {
                   // Express interest in the product
                   replyMessage = `@[${commenterId}] ${translations[language].interestResponse}`;
                   // Send direct message for expressing interest
@@ -63,6 +63,8 @@ let initWebRoutes = (app) => {
                 else if (commentSentiment.score > 0) {
                   // Positive sentiment: Thank the user
                   replyMessage = `@[${commenterId}] ${translations[language].thankYouMessage}`;
+                  await facebookService.postCommentReply(commentId, replyMessage, commentMessage, pageAccessToken, imageUrl);
+                  
                 } else if (commentSentiment.score < 0) {
                   // Send sorry image 
                   // Reply comment with a gratitude message
@@ -74,7 +76,7 @@ let initWebRoutes = (app) => {
                   // Direct message to make up the user ecompliant
                   await chatbotService.sendMessage(commentersId, directMessage);
                 }
-                // await facebookService.postCommentReply(commentId, replyMessage, commentMessage, pageAccessToken);
+                await facebookService.postCommentReply(commentId, replyMessage, commentMessage, pageAccessToken);
 
               } else {
                 console.error('Failed to extract user information from comment.')

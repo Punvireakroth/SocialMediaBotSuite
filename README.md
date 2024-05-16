@@ -1,5 +1,5 @@
-# 📬 Facebook Auto Responder
-This bot automatically performs various tasks which can automat marketing process.
+# 📬 Facebook Bot Suite
+**socialMediaBotSuite** is a comprehensive suite for social media automation. It includes:
 
 ## ✨ Features
 

@@ -63,7 +63,7 @@ let initWebRoutes = (app) => {
                 else if (commentSentiment.score > 0) {
                   // Positive sentiment: Thank the user
                   replyMessage = `@[${commenterId}] ${translations[language].thankYouMessage}`;
-                  await facebookService.postCommentReply(commentId, replyMessage, commentMessage, pageAccessToken, imageUrl);
+                  await facebookService.postCommentReply(commentId, replyMessage, commentMessage, pageAccessToken);
                   
                 } else if (commentSentiment.score < 0) {
                   // Send sorry image 
@@ -76,7 +76,7 @@ let initWebRoutes = (app) => {
                   // Direct message to make up the user ecompliant
                   await chatbotService.sendMessage(commentersId, directMessage);
                 }
-                await facebookService.postCommentReply(commentId, replyMessage, commentMessage, pageAccessToken);
+                // await facebookService.postCommentReply(commentId, replyMessage, commentMessage, pageAccessToken);
 
               } else {
                 console.error('Failed to extract user information from comment.')
@@ -91,7 +91,7 @@ let initWebRoutes = (app) => {
         setTimeout(() => {
           replied = false;
           console.log('Cooldown period expired. Ready to reply to new comments.');
-        }, 5000); // Adjust cooldown period as needed (in milliseconds)
+        }, 9000); // Adjust cooldown period as needed (in milliseconds)
       } catch (error) {
         console.error('Failed to send reply:', error);
       }

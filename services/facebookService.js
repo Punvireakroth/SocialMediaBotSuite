@@ -6,7 +6,7 @@ import request from 'request';
 // Maintain a Set to store replied comment IDs
 const repliedCommentIds = new Set();
 
-async function postCommentReply(commentId, message, commentMessage, accessToken, imageUrl) {
+async function postCommentReply(commentId, message, commentMessage, accessToken, imageUrl = null) {
     // Check if the comment ID has already been replied to
     if (repliedCommentIds.has(commentId)) {
         console.log('Comment already replied to:', commentId);
@@ -16,21 +16,19 @@ async function postCommentReply(commentId, message, commentMessage, accessToken,
     const postUrl = `https://graph.facebook.com/${commentId}/comments?access_token=${accessToken}`;
 
     try {
-        const attachment = {
-            "attachment": {
-                "type": "image",
-                "payload": {
-                    "url": imageUrl,
-                    "is_reusable": true
-                }
-            }
-        };
+        let payload;
 
-        const payload = {
-            message: message,
-            attachment: attachment
-        };
-
+        if (imageUrl) {
+            payload = {
+                message: message,
+                attachment_url: imageUrl
+            };
+        } else {
+            payload = {
+                message: message
+            };
+        }
+        
         const response = await axios.post(postUrl, payload);
         console.log('Comment reply posted successfully to:', commentMessage, response.data);
         // Add the comment ID to the Set of replied comment IDs
@@ -90,7 +88,7 @@ let handleSetupProfileAPI = () => {
                     }
                 ],
                 "whitelisted_domains": [
-                    "https://e52c-2a07-23c0-9-00-682a.ngrok-free.app/",
+                    "https://ff87-2a0d-5600-44-6000-00-acb9.ngrok-free.app/",
 
                 ],
 

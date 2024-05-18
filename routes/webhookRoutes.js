@@ -1,11 +1,18 @@
 const express = require('express');
 const router = express.Router();
-const facebookService = require('../services/facebookService');
+
+const facebookController = require('../controllers/facebookController');
+// Import utils
 const translations = require('../utils/translations');
 const determineLanguage = require('../utils/languageUtils');
-const facebookController = require('../controllers/facebookController');
+
+
+// Import service
 const chatbotService = require('../services/chatbotService');
+const facebookService = require('../services/facebookService');
 const messageTemplate = require('../services/messageTemplate');
+const translationService = require('../services/translationService');
+
 const Sentiment = require('sentiment');
 
 const sentiment = new Sentiment();
@@ -37,13 +44,24 @@ let initWebRoutes = (app) => {
               const commentersId = change.value.from.id;
 
               // Perform sentiment analysis on the comment
-              const commentSentiment = sentiment.analyze(commentMessage);
-              console.log(commentSentiment);
+              // const commentSentiment = sentiment.analyze(commentMessage);
+              // console.log(commentSentiment);
 
               // multilingual 
               let language = determineLanguage(change.value.message);
               if (language == null) {
                 language = 'kh'
+              }
+
+              let commentSentiment;
+
+              if (language === 'kh') {
+                  const translatedComment = await translationService.translateText(commentMessage, 'en');
+                  commentSentiment = sentiment.analyze(translatedComment);
+                  console.log(commentSentiment);
+              } else {
+                  commentSentiment = sentiment.analyze(commentMessage);
+                  console.log(commentSentiment);
               }
 
               let replyMessage;
@@ -59,6 +77,7 @@ let initWebRoutes = (app) => {
                   // Send direct message for expressing interest
                   const directMessage = messageTemplate.sendLearnMoreTemplate();
                   await chatbotService.sendMessage(commentersId, directMessage);
+                  await facebookService.postCommentReply(commentId, replyMessage, commentMessage, pageAccessToken);
                 }
                 else if (commentSentiment.score > 0) {
                   // Positive sentiment: Thank the user
@@ -68,7 +87,7 @@ let initWebRoutes = (app) => {
                 } else if (commentSentiment.score < 0) {
                   // Send sorry image 
                   // Reply comment with a gratitude message
-                  const imageUrl = "https://helpx.adobe.com/content/dam/help/en/photoshop/using/convert-color-image-black-white/jcr_content/main-pars/before_and_after/image-before/Landscape-Color.jpg";
+                  const imageUrl = "https://media.istockphoto.com/id/926135118/vector/apology-bow-icon.jpg?s=612x612&w=0&k=20&c=IC6QNqlw80RjXqkCNoP3an_f0OBFOwINkuMw6WX_2Ok=";
                   // Negative sentiment: Adress complaint/feedback
                   const directMessage = messageTemplate.sendFeedbackTemplate();
                   replyMessage = `@[${commenterId}] ${translations[language].complaintResponse}`;

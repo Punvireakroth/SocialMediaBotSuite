@@ -32,7 +32,7 @@ let sendMessage = (sender_psid, response) => {
                     console.log('Sent direct message successfull');
                     resolve('message sent!')
                 } else {
-                    console.log('Sent direct message UNsuccessfull');
+                    console.log('Sent direct message Unsuccessfull');
                     reject("Unable to send message:" + err);
                 }
             });

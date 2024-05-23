@@ -75,6 +75,33 @@ let sendLearnMoreTemplate = () => {
     return response;
 };
 
+// Send text attached with image 
+
+const facebookService = require('./facebookService'); 
+
+const textAndImageTemplate = async (sender_psid) => {
+    let username = await facebookService.getUserName(sender_psid);
+    let responses = [];
+
+    let firstResponse = {
+        "text": `👋 សួស្ដី, ${username} ❤️! អរគុណសម្រាប់ការទំនាក់ទំនងមកកាន់យើងខ្ញុំ 🤔 \n\n តើមានអ្វីខ្ញុំអាចជួយអ្នកបាន?`
+    };
+    responses.push(firstResponse);
+
+    let secondResponse = {
+        "attachment": {
+            'type': 'image',
+            'payload': {
+                'url': 'https://i.pinimg.com/564x/55/06/fa/5506fa1e30ce919e67d5950c8f971b8c.jpg',
+            }
+        }
+    };
+    responses.push(secondResponse);
+
+    return responses;
+};
+
+
 let sendFeedbackTemplate = () => {
     let response = {
         "attachment": {
@@ -219,6 +246,7 @@ let sendLookupRegisterTemplate = () => {
 
 module.exports = {
     sendLearnMoreTemplate,
+    textAndImageTemplate,
     handleProductDetialTemplate,
     requestPricesOptionsTemplate,
     vendorInformationTemplate,

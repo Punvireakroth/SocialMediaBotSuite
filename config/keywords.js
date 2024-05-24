@@ -1,4 +1,4 @@
 module.exports = {
     replyOnly: ['contact', 'info', 'help', 'support'],
-    replyAndDirectMessage: ['price', 'how much', 'offer', 'discount', 'deal', 'promotion']
+    replyAndDirectMessage: ['howmuch', 'how', 'much', 'price', 'how much', 'offer', 'discount', 'deal', 'promotion']
 };

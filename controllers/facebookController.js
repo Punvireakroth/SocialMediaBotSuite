@@ -42,7 +42,7 @@ let postWebhook = async (req, res) => {
             // Process webhook event and send reply
             for (const entry of body.entry) {
                 for (const change of entry.changes) {
-                    const commentMessage = change.value.message
+                    const commentMessage = change.value.message.toLowerCase();
 
                     if (change.value && change.value.item === 'comment' && change.value.verb === 'add') {
                         const commentId = change.value.comment_id;
@@ -74,43 +74,53 @@ let postWebhook = async (req, res) => {
                             console.log(textTokens);
                         }
 
+                     
+
+
                         let replyMessage;
 
-                        // Get this information to mention the user.
-                        const userInfo = facebookService.extractUserInfo(change);
+                        // Determine action based on keywords
+                        let detectedAction = null;
 
-                        if (userInfo) {
-                            const { commenterId } = userInfo;
-                            // User interest in the product
-                            if (commentSentiment.score >= 2 && commentSentiment.score >= 0) {
-                                replyMessage = `@[${commenterId}] ${translations[language].interestResponse}`;
-                                // Direct message with text attached with image
-                                const directMessages = await messageTemplate.textAndImageTemplate(commentersId);
-                                for (const message of directMessages) {
-                                    await chatbotService.sendMessage(commentersId, message);
+                        // Check the keywords
+                        for(let token of textTokens) {
+                            if (keywordsConfig.replyOnly.includes(token)) {
+                                detectedAction = { reply: true, directMessage: false };
+                                break;
+                            } else if (keywordsConfig.replyAndDirectMessage.includes(token)) {
+                                detectedAction = { reply: true, directMessage: true };
+                                break;
+                            }
+                        }
+
+
+                        // If an action is detected based on the keywords
+                        if (detectedAction) {
+                            const userInfo = facebookService.extractUserInfo(change);
+
+                            if (userInfo) {
+                                const { commenterId } = userInfo;
+
+                                // Reply to the comment if needed
+                                if (detectedAction.reply) {
+                                    let replyMessage = `@[${commenterId}] ${translations[language].thankYouMessage}`;
+                                    await facebookService.postCommentReply(commentId, replyMessage, commentMessage, pageAccessToken);
                                 }
-                                await facebookService.postCommentReply(commentId, replyMessage, commentMessage, pageAccessToken);
-                            }
-                            else if (commentSentiment.score > 0) {
-                                // Positive sentiment: Thank the user
-                                replyMessage = `@[${commenterId}] ${translations[language].thankYouMessage}`;
-                                await facebookService.postCommentReply(commentId, replyMessage, commentMessage, pageAccessToken);
 
-                            } else if (commentSentiment.score < 0) {
-                                // Send sorry image 
-                                // Reply comment with a gratitude message
-                                const imageUrl = "https://media.istockphoto.com/id/926135118/vector/apology-bow-icon.jpg?s=612x612&w=0&k=20&c=IC6QNqlw80RjXqkCNoP3an_f0OBFOwINkuMw6WX_2Ok=";
-                                // Negative sentiment: Adress complaint/feedback
-                                const directMessage = messageTemplate.sendFeedbackTemplate();
-                                replyMessage = `@[${commenterId}] ${translations[language].complaintResponse}`;
-                                await facebookService.postCommentReply(commentId, replyMessage, commentMessage, pageAccessToken, imageUrl);
-                                // Direct message to make up the user ecompliant
-                                await chatbotService.sendMessage(commentersId, directMessage);
+                                // Send a direct message and reply to a comment 
+                                if (detectedAction.directMessage) {
+                                    // Reply to a comment
+                                    let replyMessage = `@[${commenterId}] ${translations[language].interestResponse}`;
+                                    await facebookService.postCommentReply(commentId, replyMessage, commentMessage, pageAccessToken);
+                                    // Send a direct message
+                                    const directMessages = await messageTemplate.textAndImageTemplate(commentersId);
+                                    for (const message of directMessages) {
+                                        await chatbotService.sendMessage(commentersId, message);
+                                    }
+                                }
+                            } else {
+                                console.error('Failed to extract user information from comment.');
                             }
-                            // await facebookService.postCommentReply(commentId, replyMessage, commentMessage, pageAccessToken);
-
-                        } else {
-                            console.error('Failed to extract user information from comment.')
                         }
                     }
                 }

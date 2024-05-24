@@ -13,6 +13,7 @@
     "@google-cloud/translate": "^8.2.0",
     "axios": "^1.6.8",
     "body-parser": "^1.20.2",
+    "child_process": "^1.0.2",
     "dotenv": "^16.4.5",
     "ejs": "^3.1.9",
     "express": "^4.19.1",

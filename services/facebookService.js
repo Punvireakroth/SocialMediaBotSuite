@@ -1,3 +1,5 @@
+const { exec } = require('child_process');
+const path = require('path');
 import axios from 'axios';
 require('dotenv').config();
 import request from 'request';
@@ -58,6 +60,21 @@ function extractUserInfo(comment) {
     }
 }
 
+// Function to tokenize Khmer text using the Python script
+
+const khmerTokenizerPath = path.resolve(__dirname, '../utils/khmer_tokenizer.py');
+
+const tokenizeKhmerText = (text) => {
+    return new Promise((resolve, reject) => {
+        exec(`python3 "${khmerTokenizerPath}" "${text}"`, (error, stdout, stderr) => {
+            if (error) {
+                reject(error);
+            } else {
+                resolve(JSON.parse(stdout));
+            }
+        });
+    });
+};
 
 // --------************************** Messenger Platform services ********************-----------------
 
@@ -192,6 +209,7 @@ let markMessageRead = (sender_psid) => {
 module.exports = {
     extractUserInfo,
     postCommentReply,
+    tokenizeKhmerText,
     handleSetupProfileAPI,
     getUserName,
     sendTypingOn,

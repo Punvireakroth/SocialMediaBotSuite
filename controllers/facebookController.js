@@ -11,7 +11,6 @@ const determineLanguage = require('../utils/languageUtils');
 const chatbotService = require('../services/chatbotService');
 const facebookService = require('../services/facebookService');
 const messageTemplate = require('../services/messageTemplate');
-const translationService = require('../services/translationService');
 
 const Sentiment = require('sentiment');
 
@@ -33,7 +32,6 @@ let replied = false;
 
 let postWebhook = async (req, res) => {
     const body = req.body;
-    // const language = determineLanguage(body); 
 
     // Check if the server hasn't replied yet and the request is valid
     if (!replied && body.object === 'page' && body.entry) {
@@ -58,13 +56,11 @@ let postWebhook = async (req, res) => {
 
                         let commentSentiment;
                         let textTokens;
-
+                        
+                        // Tokenize text based on the language
                         if (language === 'kh') {
-                            const translatedComment = await translationService.translateText(commentMessage, 'en');
-                            commentSentiment = sentiment.analyze(translatedComment);
-                            textTokens = commentSentiment.tokens;
-                            console.log(commentSentiment);
-                            console.log('-------------------------');
+                            textTokens = await facebookService.tokenizeKhmerText(commentMessage);
+                            console.log('-----------បំបែកពាក្យ--------------');
                             console.log(textTokens);
                         } else {
                             commentSentiment = sentiment.analyze(commentMessage);
@@ -73,12 +69,6 @@ let postWebhook = async (req, res) => {
                             console.log('-------------------------');
                             console.log(textTokens);
                         }
-
-                     
-
-
-                        let replyMessage;
-
                         // Determine action based on keywords
                         let detectedAction = null;
 

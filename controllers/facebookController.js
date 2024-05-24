@@ -1,4 +1,6 @@
+// Config files
 require('dotenv').config();
+const keywordsConfig = require('../config/keywords');
 
 // Import utils
 const translations = require('../utils/translations');
@@ -55,14 +57,21 @@ let postWebhook = async (req, res) => {
                         }
 
                         let commentSentiment;
+                        let textTokens;
 
                         if (language === 'kh') {
                             const translatedComment = await translationService.translateText(commentMessage, 'en');
                             commentSentiment = sentiment.analyze(translatedComment);
+                            textTokens = commentSentiment.tokens;
                             console.log(commentSentiment);
+                            console.log('-------------------------');
+                            console.log(textTokens);
                         } else {
                             commentSentiment = sentiment.analyze(commentMessage);
+                            textTokens = commentSentiment.tokens;
                             console.log(commentSentiment);
+                            console.log('-------------------------');
+                            console.log(textTokens);
                         }
 
                         let replyMessage;

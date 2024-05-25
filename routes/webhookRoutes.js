@@ -17,6 +17,9 @@ let initWebRoutes = (app) => {
 
   router.get('/info-register', facebookController.getInfoRegisterPage);
 
+  router.post('/addKeyword', keywordController.addKeyword);
+
+
   return app.use('/', router);
 }
 

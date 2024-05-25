@@ -1,4 +1,5 @@
 const express = require('express');
+const cors = require('cors');
 const configEngine = require('./config/viewEngine');
 const initWebRoutes = require('./routes/webhookRoutes');
 import bodyParser from 'body-parser'; 
@@ -6,6 +7,9 @@ import bodyParser from 'body-parser';
 require('dotenv').config();
 
 const app = express();
+
+// Resolve cors
+app.use(cors());
 
 // Middleware to parse JSON bodies
 app.use(bodyParser.json());

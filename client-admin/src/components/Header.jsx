@@ -7,8 +7,8 @@ const Header = () => {
             <div className="container mx-auto flex justify-between items-center">
                 <h1 className="text-xl font-bold">Keyword Manager</h1>
                 <nav>
-                    <Link to="/" className="mr-4">Home</Link><br />
-                    <Link to="/add-keyword" className="mr-4">Add Keyword</Link><br />
+                    <Link to="/" className="mr-4">Home</Link>
+                    <Link to="/add-keyword" className="mr-4">Add Keyword</Link>
                     <Link to="/keyword-list">Keyword List</Link>
                 </nav>
             </div>

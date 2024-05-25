@@ -3,12 +3,21 @@ const mongoose = require('mongoose');
 const configEngine = require('./config/viewEngine');
 const initWebRoutes = require('./routes/webhookRoutes');
 require('dotenv').config();
+const cors = require('cors');
 
 const app = express();
 
 // Middleware to parse JSON bodies
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+
+// Enable CORS for all routes and methods
+const corsOptions = {
+    origin: 'http://localhost:3000', 
+    methods: ['GET', 'POST', 'PUT', 'DELETE'],
+    allowedHeaders: ['Content-Type', 'Authorization']
+};
+app.use(cors(corsOptions));
 
 // View engine configuration
 configEngine(app);

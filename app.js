@@ -1,19 +1,14 @@
 const express = require('express');
-const cors = require('cors');
+const mongoose = require('mongoose');
 const configEngine = require('./config/viewEngine');
 const initWebRoutes = require('./routes/webhookRoutes');
-import bodyParser from 'body-parser'; 
-
 require('dotenv').config();
 
 const app = express();
 
-// Resolve cors
-app.use(cors());
-
 // Middleware to parse JSON bodies
-app.use(bodyParser.json());
-app.use(bodyParser.urlencoded({ extended: true }));
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
 
 // View engine configuration
 configEngine(app);
@@ -21,10 +16,26 @@ configEngine(app);
 // Mount routes
 initWebRoutes(app);
 
-// Start server
-const PORT = process.env.PORT || 8080;
-app.listen(PORT, () => {
-    console.log(`Server running on port ${PORT}`);
+// Connect to MongoDB
+const connectionURL = process.env.MONGO_URL;
+
+mongoose.connect(connectionURL, {
+}).then(() => {
+    console.log('=======================================');
+
+    console.log('Connected to MongoDB');
+
+    console.log('=======================================');
+
+
+    // Start the server after successful connection to MongoDB
+    const PORT = process.env.PORT || 8080;
+    app.listen(PORT, () => {
+        console.log(`Server running on port ${PORT}`);
+        console.log('=======================================');
+
+    });
+}).catch((error) => {
+    console.error('Failed to connect to MongoDB:', error);
+    process.exit(1); // Exit the process with a failure code
 });
-
-

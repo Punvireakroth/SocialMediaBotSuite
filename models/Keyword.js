@@ -1,8 +1,10 @@
 const mongoose = require('mongoose');
 
 const keywordSchema = new mongoose.Schema({
-    keyword: String,
-    action: String // 'reply' or 'replyAndDirectMessage'
+    keyword: { type: String, required: true },
+    action: { type: String, required: true }
 });
 
-module.exports = mongoose.model('Keyword', keywordSchema);
+const Keyword = mongoose.model('Keyword', keywordSchema);
+
+module.exports = Keyword;

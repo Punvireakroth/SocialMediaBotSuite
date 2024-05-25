@@ -2,9 +2,9 @@ const Keyword = require('../models/Keyword');
 
 const addKeyword = async (req, res) => {
     const { keyword, action } = req.body;
-    const newKeyword = new Keyword({ keyword, action });
 
     try {
+        const newKeyword = new Keyword({ keyword, action });
         await newKeyword.save();
         res.status(200).send('Keyword added successfully');
     } catch (error) {

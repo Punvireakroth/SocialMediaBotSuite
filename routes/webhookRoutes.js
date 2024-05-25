@@ -19,6 +19,8 @@ let initWebRoutes = (app) => {
 
   router.post('/addKeyword', keywordController.addKeyword);
 
+  router.get('/keywords', keywordController.getKeyword);
+
 
   return app.use('/', router);
 }

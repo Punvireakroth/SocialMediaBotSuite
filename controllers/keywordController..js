@@ -12,6 +12,19 @@ const addKeyword = async (req, res) => {
     }
 };
 
+
+// Get all keywords
+const getKeyword = async(req, res) => {
+    try {
+        const keywords = await Keyword.find();
+        res.status(200).send(keywords);
+      } catch (error) {
+        res.status(500).send(error);
+      }
+}
+
+
 module.exports = {
     addKeyword,
+    getKeyword
 };

@@ -13,6 +13,7 @@ const facebookService = require('../services/facebookService');
 const messageTemplate = require('../services/messageTemplate');
 
 const Sentiment = require('sentiment');
+const Keyword = require('../models/Keyword');
 
 const sentiment = new Sentiment();
 
@@ -36,6 +37,13 @@ let postWebhook = async (req, res) => {
     // Check if the server hasn't replied yet and the request is valid
     if (!replied && body.object === 'page' && body.entry) {
         try {
+            // Fetch keywords from the database
+            const replyOnlyKeywords = await Keyword.find({action: 'reply'}).exec();
+            const replyAndDirectMessageKeywords = await Keyword.find({ action: 'replyAndDirectMessage' }).exec();
+
+             // Convert the keyword documents to arrays of strings
+             const replyOnly = replyOnlyKeywords.map(keyword => keyword.keyword);
+             const replyAndDirectMessage = replyAndDirectMessageKeywords.map(keyword => keyword.keyword);
 
             // Process webhook event and send reply
             for (const entry of body.entry) {
@@ -74,10 +82,10 @@ let postWebhook = async (req, res) => {
 
                         // Check the keywords
                         for(let token of textTokens) {
-                            if (keywordsConfig.replyOnly.includes(token)) {
+                            if (replyOnly.includes(token)) {
                                 detectedAction = { reply: true, directMessage: false };
                                 break;
-                            } else if (keywordsConfig.replyAndDirectMessage.includes(token)) {
+                            } else if (replyAndDirectMessage.includes(token)) {
                                 detectedAction = { reply: true, directMessage: true };
                                 break;
                             }

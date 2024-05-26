@@ -7,8 +7,9 @@ const KeywordForm = () => {
 
     const handleSubmit = async (e) => {
         e.preventDefault();
+        const lowerCaseKeyword = keyword.toLowerCase();
         try {
-            await axios.post('http://localhost:8080/addKeyword', { keyword, action });
+            await axios.post('http://localhost:8080/addKeyword', { keyword: lowerCaseKeyword, action });
             alert('Keyword added successfully');
             setKeyword('');
         } catch (error) {

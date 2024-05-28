@@ -45,6 +45,10 @@ let postWebhook = async (req, res) => {
              const replyOnly = replyOnlyKeywords.map(keyword => keyword.keyword);
              const replyAndDirectMessage = replyAndDirectMessageKeywords.map(keyword => keyword.keyword);
 
+             // import districts
+             const districts = keywordsConfig.districts;
+             console.log(districts);
+
             // Process webhook event and send reply
             for (const entry of body.entry) {
                 for (const change of entry.changes) {
@@ -59,9 +63,9 @@ let postWebhook = async (req, res) => {
 
                         // multilingual 
                         let language = determineLanguage(commentMessage);
-                        if (language == null) {
-                            language = 'kh'
-                        }
+                
+                        if (!language) language = 'kh';
+
 
                         let commentSentiment;
                         let textTokens;
@@ -91,6 +95,15 @@ let postWebhook = async (req, res) => {
                             }
                         }
 
+                        // Check if any of the tokens in the comment match these districts. If a match is found, we save the district to the database.
+
+                        for (let token of textTokens) {
+                            if (districts.includes(token)) {
+                                const district = new District({ name: token, commentId });
+                                await district.save();
+                                console.log(`District "${token}" detected and saved.`);
+                            }
+                        }
 
                         // If an action is detected based on the keywords
                         if (detectedAction) {

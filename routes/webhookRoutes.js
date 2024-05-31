@@ -21,6 +21,8 @@ let initWebRoutes = (app) => {
 
   router.get('/keywords', keywordController.getKeyword);
 
+  router.get('/districts', keywordController.getLocation);
+
 
   return app.use('/', router);
 }

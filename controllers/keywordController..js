@@ -1,4 +1,6 @@
 const Keyword = require('../models/Keyword');
+const District = require('../models/District');
+
 
 const addKeyword = async (req, res) => {
     const { keyword, action } = req.body;
@@ -23,8 +25,19 @@ const getKeyword = async(req, res) => {
       }
 }
 
+// Get all location
+
+const getLocation = async (req, res) => {
+    try {
+        const districts = await District.find();
+        res.json(districts);
+    } catch (error) {
+        res.status(500).json({ message: error.message });
+    }
+}
 
 module.exports = {
     addKeyword,
-    getKeyword
+    getKeyword,
+    getLocation,
 };

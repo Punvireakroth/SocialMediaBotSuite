@@ -14,6 +14,7 @@ const messageTemplate = require('../services/messageTemplate');
 
 const Sentiment = require('sentiment');
 const Keyword = require('../models/Keyword');
+const District = require('../models/District');
 
 const sentiment = new Sentiment();
 
